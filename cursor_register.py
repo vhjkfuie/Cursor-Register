@@ -198,9 +198,13 @@ def main(config: DictConfig):
         oneapi_token = config.oneapi.token
         oneapi_channel_url = config.oneapi.channel_url
         id = uuid.uuid4()
-        for token in tokens:
+        # 直接循环account_infos中的每个账号信息
+        for account_info in account_infos:
+            username = account_info['username']
+            token = account_info['token']
+            # 从token中提取auth_code部分
             auth_code = token.split("%3A%3A")[1]
-            insert_auth_code(oneapi_url, oneapi_token, auth_code, token[0], str(id))
+            insert_auth_code(oneapi_url, oneapi_token, auth_code, username, str(id))
 
 if __name__ == "__main__":
     main()
