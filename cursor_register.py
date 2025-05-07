@@ -1,6 +1,8 @@
+import json
 import os
 import csv
 import copy
+import requests
 import argparse
 import concurrent.futures
 import uuid
@@ -215,7 +217,7 @@ def main(config: DictConfig):
         id = uuid.uuid4()
         for token in tokens:
             auth_code = token.split("%3A%3A")[1]
-            insert_auth_code(oneapi_url, oneapi_token, auth_code, token[0], id)
+            insert_auth_code(oneapi_url, oneapi_token, auth_code, token[0], str(id))
 
 if __name__ == "__main__":
     main()
