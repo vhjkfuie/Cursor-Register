@@ -17,10 +17,10 @@ on:
       ingest_to_oneapi:
         description: 'Ingest account tokens to OneAPI'
         type: boolean
+        default: true
       upload_artifact:
         description: 'Upload account infos to artifact'
         type: boolean
-        default: true
 
 jobs:
   build:
