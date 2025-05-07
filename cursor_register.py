@@ -147,6 +147,17 @@ def insert_auth_code(api_url, admin_key, auth_code, auth_email=None, auth_uuid=N
     返回:
         dict: API响应数据
     """
+        
+    # 检查auth_code是否为JSON格式
+    try:
+        json_data = json.loads(auth_code)
+        if isinstance(json_data, dict) and "accessToken" in json_data:
+            # 提取accessToken
+            auth_code = json_data["accessToken"]
+            print(f"已从JSON提取accessToken")
+    except (json.JSONDecodeError, TypeError):
+        # 不是JSON或不包含accessToken，使用原始auth_code
+        pass
 
     # 准备请求数据
     payload = {
