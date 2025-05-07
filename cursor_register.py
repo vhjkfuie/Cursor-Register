@@ -136,39 +136,22 @@ def register_cursor(register_config):
     return results
 
 def insert_auth_code(api_url, admin_key, auth_code, auth_email=None, auth_uuid=None):
-    """
-    向数据库插入新的auth_code，支持JSON格式的auth_code
-
-    参数:
-        auth_code (str): 要插入的授权码或JSON字符串
-        auth_email (str, 可选): 关联的邮箱
-        auth_uuid (str, 可选): 关联的UUID
-
-    返回:
-        dict: API响应数据
-    """
-        
-    # 检查auth_code是否为JSON格式
     try:
         json_data = json.loads(auth_code)
         if isinstance(json_data, dict) and "accessToken" in json_data:
-            # 提取accessToken
             auth_code = json_data["accessToken"]
-            print(f"已从JSON提取accessToken")
+            print(f"get accessToken")
     except (json.JSONDecodeError, TypeError):
-        # 不是JSON或不包含accessToken，使用原始auth_code
         pass
 
-    # 准备请求数据
     payload = {
         "admin_key": admin_key,
         "auth_code": auth_code,
         "auth_email": auth_email,
         "auth_uuid": str(auth_uuid) if auth_uuid else None,
-        "auth_time": int(time.time()),  # 当前时间的Unix时间戳
+        "auth_time": int(time.time()),  
     }
 
-    # 发送POST请求
     headers = {"Content-Type": "application/json"}
 
     try:
@@ -178,19 +161,18 @@ def insert_auth_code(api_url, admin_key, auth_code, auth_email=None, auth_uuid=N
             headers=headers
         )
 
-        # 解析响应
         result = response.json()
 
         if response.status_code == 201:
-            print(f"成功插入auth_code")
+            print(f"insert auth_code success")
             print(f"UUID: {result['data']['auth_uuid']}")
         else:
-            print(f"错误: {result.get('error', '未知错误')}")
+            print(f"error: {result.get('error', 'unknown error')}")
 
         return result
 
     except Exception as e:
-        print(f"请求出错: {str(e)}")
+        print(f"error: {str(e)}")
         return {"success": False, "error": str(e)}
 
 @hydra.main(config_path="config", config_name="config", version_base=None)
