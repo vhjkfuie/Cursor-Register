@@ -197,9 +197,9 @@ def main(config: DictConfig):
         oneapi_url = config.oneapi.url
         oneapi_token = config.oneapi.token
         oneapi_channel_url = config.oneapi.channel_url
-        id = uuid.uuid4()
         # 直接循环account_infos中的每个账号信息
         for account_info in account_infos:
+            id = uuid.uuid4()
             username = account_info['username']
             token = account_info['token']
             # 从token中提取auth_code部分
