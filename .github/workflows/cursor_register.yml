@@ -12,8 +12,8 @@ on:
       email_server:
         type: choice
         options:
-        - POP3
         - IMAP
+        - POP3
         - TempEmail
       ingest_to_oneapi:
         description: 'Ingest account tokens to OneAPI'
