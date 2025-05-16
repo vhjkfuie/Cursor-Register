@@ -57,6 +57,43 @@ register:
 ```
 - `register.temp_email_server.name`: 使用的临时邮箱服务器
 
+#### POP3 电子邮件服务器配置
+
+使用POP3接受邮箱验证码。
+
+```
+register:
+  email_server:
+    name: pop3_email_server
+    use_custom_address: true
+    custom_email_address:
+    - email1@outlook.com
+    - email2@outlook.com
+
+pop3_email_server:
+  pop3_server: pop.qq.com
+  pop3_port: 995
+  username: username
+  password: password
+```
+- `register.email_server.name`: 使用 POP3 接收邮件时应为 `pop3_email_server`
+- `register.email_server.use_custom_address`: 使用 POP3 接收邮件时应为 `true`
+- `register.email_server.custom_email_address`: 邮件地址列表
+- `register.pop3_email_server`: POP3 服务器配置
+
+> **注意**：POP3协议与IMAP协议在邮件获取机制上存在差异。如果使用POP3无法接收到验证码邮件，请检查:
+> 1. 确认POP3服务器地址和端口配置正确
+> 2. 确认邮箱已开启POP3访问权限
+> 3. 某些邮件服务商可能需要单独为第三方应用生成访问密码
+> 4. 建议尝试使用IMAP协议，IMAP通常提供更可靠的邮件获取能力
+
+在GitHub Actions中使用POP3时，需要添加以下密钥：
+- `CURSOR_POP3_SERVER`: POP3服务器地址
+- `CURSOR_POP3_PORT`: POP3端口
+- `CURSOR_POP3_USERNAME`: POP3用户名
+- `CURSOR_POP3_PASSWORD`: POP3密码
+- `CURSOR_CUSTOM_EMAIL_ADDRESS`: 邮件地址列表，多个地址用逗号分隔
+
 #### IMAP 电子邮件服务器配置
 
 使用IMAP接受邮箱验证码。

@@ -56,6 +56,43 @@ register:
 ```
 - `register.temp_email_server.name`: Which temp email you are using
 
+#### POP3 email server configuration
+
+When you use POP3 to receive the email verification code, you should edit the parameter for your POP3 account.
+
+```
+register:
+  email_server: 
+    name: pop3_email_server
+    use_custom_address: true
+    custom_email_address:
+    - email1@outlook.com
+    - email2@outlook.com
+
+  pop3_email_server:
+    pop3_server: pop.qq.com
+    pop3_port: 995
+    username: username
+    password: password
+```
+- `register.email_server.name`: Should be `pop3_email_server` when use POP3 receives the email
+- `register.email_server.use_custom_address`: Should be `true` when use POP3 receives the email
+- `register.email_server.custom_email_address`: Email address list
+- `register.pop3_email_server`: Your POP3 server configuration
+
+> **Note**: POP3 protocol differs from IMAP in its mail retrieval mechanism. If you cannot receive verification emails using POP3, please check:
+> 1. Confirm that the POP3 server address and port are configured correctly
+> 2. Ensure that POP3 access is enabled for your email account
+> 3. Some email providers may require generating an app password specifically for third-party applications
+> 4. Consider using IMAP protocol instead, which typically provides more reliable mail retrieval capabilities
+
+When using POP3 in GitHub Actions, add the following secrets:
+- `CURSOR_POP3_SERVER`: POP3 server address
+- `CURSOR_POP3_PORT`: POP3 port
+- `CURSOR_POP3_USERNAME`: POP3 username
+- `CURSOR_POP3_PASSWORD`: POP3 password
+- `CURSOR_CUSTOM_EMAIL_ADDRESS`: Email address list, comma-separated
+
 #### IMAP email server configuration
 
 When you use IMAP to receive the email verification code, you should edit the parameter for your IMAP account.
