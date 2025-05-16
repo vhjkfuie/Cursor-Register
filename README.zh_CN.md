@@ -57,30 +57,6 @@ register:
 ```
 - `register.temp_email_server.name`: 使用的临时邮箱服务器
 
-#### POP3 电子邮件服务器配置
-
-使用POP3接受邮箱验证码。
-
-```
-register:
-  email_server:
-    name: pop3_email_server
-    use_custom_address: true
-    custom_email_address:
-    - email1@outlook.com
-    - email2@outlook.com
-
-pop3_email_server:
-  pop3_server: pop.qq.com
-  pop3_port: 995
-  username: username
-  password: password
-```
-- `register.email_server.name`: 使用 POP3 接收邮件时应为 `pop3_email_server`
-- `register.email_server.use_custom_address`: 使用 POP3 接收邮件时应为 `true`
-- `register.email_server.custom_email_address`: 邮件地址列表
-- `register.pop3_email_server`: POP3 服务器配置
-
 #### IMAP 电子邮件服务器配置
 
 使用IMAP接受邮箱验证码。

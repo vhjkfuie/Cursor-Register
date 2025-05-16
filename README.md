@@ -56,30 +56,6 @@ register:
 ```
 - `register.temp_email_server.name`: Which temp email you are using
 
-#### POP3 email server configuration
-
-When you use POP3 to receive the email verification code, you should edit the parameter for your POP3 account.
-
-```
-register:
-  email_server: 
-    name: pop3_email_server
-    use_custom_address: true
-    custom_email_address:
-    - email1@outlook.com
-    - email2@outlook.com
-
-  pop3_email_server:
-    pop3_server: pop.qq.com
-    pop3_port: 995
-    username: username
-    password: password
-```
-- `register.email_server.name`: Should be `pop3_email_server` when use POP3 receives the email
-- `register.email_server.use_custom_address`: Should be `true` when use POP3 receives the email
-- `register.email_server.custom_email_address`: Email address list
-- `register.pop3_email_server`: Your POP3 server configuration
-
 #### IMAP email server configuration
 
 When you use IMAP to receive the email verification code, you should edit the parameter for your IMAP account.

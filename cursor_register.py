@@ -41,13 +41,6 @@ def register_cursor_core(register_config, options):
         imap_password = register_config.imap_email_server.password
         email_address = register_config.email_server.email_address
         email_server = Imap(imap_server, imap_port, imap_username, imap_password, email_to = email_address)
-    elif register_config.email_server.name == "pop3_email_server":
-        pop3_server = register_config.pop3_email_server.pop3_server
-        pop3_port = register_config.pop3_email_server.pop3_port
-        pop3_username = register_config.pop3_email_server.username
-        pop3_password = register_config.pop3_email_server.password
-        email_address = register_config.email_server.email_address
-        email_server = Pop3(pop3_server, pop3_port, pop3_username, pop3_password, email_to = email_address)
 
     register = CursorRegister(browser, email_server)
     tab_signin, status = register.sign_in(email_address)
@@ -57,7 +50,7 @@ def register_cursor_core(register_config, options):
     if token is not None:
         user_id = token.split("%3A%3A")[0]
         delete_low_balance_account = register_config.delete_low_balance_account
-        if (register_config.email_server.name == "imap_email_server" or register_config.email_server.name == "pop3_email_server") and delete_low_balance_account:
+        if register_config.email_server.name == "imap_email_server" and delete_low_balance_account:
             delete_low_balance_account_threshold = register_config.delete_low_balance_account_threshold
 
             usage = register.get_usage(user_id)
@@ -189,12 +182,13 @@ def main(config: DictConfig):
     email_server_name = config.register.email_server.name
     use_custom_address = config.register.email_server.use_custom_address
     custom_email_address = config.register.email_server.custom_email_address
-    assert email_server_name in ["temp_email_server", "imap_email_server", "pop3_email_server"], "email_server_name should be either temp_email_server, imap_email_server, or pop3_email_server"
-    assert not use_custom_address or (use_custom_address and (email_server_name == "imap_email_server" or email_server_name == "pop3_email_server")), "use_custom_address should be True only when email_server_name is imap_email_server or pop3_email_server"
-    if use_custom_address and (email_server_name == "imap_email_server" or email_server_name == "pop3_email_server"):
+    assert email_server_name in ["temp_email_server", "imap_email_server"], "email_server_name should be either temp_email_server or imap_email_server"
+    assert use_custom_address and email_server_name == "imap_email_server" or not use_custom_address, "use_custom_address should be True only when email_server_name is imap_email_server"
+    if use_custom_address and email_server_name == "imap_email_server":
         config.register.number = len(custom_email_address)
         print(f"[Register] Parameter regitser.number is overwritten by the length of custom_email_address: {len(custom_email_address)}")
     
+
     account_infos = register_cursor(config.register)
     tokens = list(set([row['token'] for row in account_infos]))
     print(f"[Register] Register {len(tokens)} accounts successfully")

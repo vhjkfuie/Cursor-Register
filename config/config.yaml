@@ -1,23 +1,17 @@
 register:
   number: 1                                  # The account number you want to register
   max_workers: 1                             # Max worker number in multi-threading
-  delete_low_balance_account: true           # [Email Protocol] Re-register account if the balance is not enough
-  delete_low_balance_account_threshold: 50   # [Email Protocol] Re-register account balance threshold
+  delete_low_balance_account: true           # [IMAP only] Re-register account if the balance is not enough
+  delete_low_balance_account_threshold: 50   # [IMAP only] Re-register account balance threshold
   email_server: 
-    name: temp_email_server                  # Should be temp_email_server or pop3_email_server or imap_email_server
-    use_custom_address: false                # [Email Protocol] Should be true when use pop3_email_server or imap_email_server
-    custom_email_address:                    # [Email Protocol] email address list
+    name: temp_email_server                  # Should be temp_email_server or imap_email_server
+    use_custom_address: false                # [IMAP only] Should be true when use imap_email_server
+    custom_email_address:                    # [IMAP only] email address list
     - email1@outlook.com
     - email2@outlook.com
 
   temp_email_server:                         # Temp email server you use
     name: Minuteinboxcom
-
-  pop3_email_server:                         # POP3 setting
-    pop3_server: pop.qq.com
-    pop3_port: 995
-    username: username
-    password: password
 
   imap_email_server:                         # IMAP setting
     imap_server: imap.qq.com
