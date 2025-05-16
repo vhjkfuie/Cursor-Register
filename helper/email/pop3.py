@@ -88,12 +88,12 @@ class Pop3(EmailServer):
                         "content": content
                     }
                 except Exception as e:
-                    print(f"处理邮件 {i} 时出错: {str(e)}")
+                    print(f"Error processing email {i}: {str(e)}")
                     continue
             
             return None
         except Exception as e:
-            print(f"获取邮件时发生错误: {str(e)}")
+            print(f"Error fetching emails: {str(e)}")
             # 尝试重新连接
             try:
                 self.mail.quit()
@@ -107,18 +107,18 @@ class Pop3(EmailServer):
     def wait_for_new_message(self, delay=5, timeout=60):
         start_time = time.time()
         
-        print(f"[POP3] 等待接收新邮件，超时时间: {timeout}秒")
+        print(f"[POP3] Waiting for new emails, timeout: {timeout} seconds")
         
         while time.time() - start_time <= timeout:
             try:
                 email_data = self.fetch_emails_since(start_time)
                 if email_data is not None:
-                    print(f"[POP3] 成功接收邮件，主题: {email_data.get('subject', '无主题')}")
+                    print(f"[POP3] Email received successfully, subject: {email_data.get('subject', 'No subject')}")
                     return email_data
             except Exception as e:
-                print(f"[POP3] 等待邮件时出错: {str(e)}")
+                print(f"[POP3] Error while waiting for email: {str(e)}")
             
             time.sleep(delay)
         
-        print(f"[POP3] 等待邮件超时，未收到新邮件")
+        print(f"[POP3] Timeout waiting for email, no new messages received")
         return None 

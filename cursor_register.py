@@ -47,7 +47,7 @@ def register_cursor_core(register_config, options):
         pop3_username = register_config.pop3_email_server.username
         pop3_password = register_config.pop3_email_server.password
         email_address = register_config.email_server.email_address
-        print(f"[POP3] 使用地址: {email_address}")
+        print(f"[POP3] Using address: {email_address}")
         email_server = Pop3(pop3_server, pop3_port, pop3_username, pop3_password, email_to = email_address)
 
     register = CursorRegister(browser, email_server)
