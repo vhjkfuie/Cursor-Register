@@ -1,8 +1,12 @@
+import json
 import os
 import csv
 import copy
+import time
+import requests
 import argparse
 import concurrent.futures
+import uuid
 import hydra
 from faker import Faker
 from datetime import datetime
@@ -131,6 +135,46 @@ def register_cursor(register_config):
 
     return results
 
+def insert_auth_code(api_url, admin_key, auth_code, auth_email=None, auth_uuid=None):
+    try:
+        json_data = json.loads(auth_code)
+        if isinstance(json_data, dict) and "accessToken" in json_data:
+            auth_code = json_data["accessToken"]
+            print(f"get accessToken")
+    except (json.JSONDecodeError, TypeError):
+        pass
+
+    payload = {
+        "admin_key": admin_key,
+        "auth_code": auth_code,
+        "auth_email": auth_email,
+        "auth_uuid": str(auth_uuid) if auth_uuid else None,
+        "auth_time": int(time.time()),  
+    }
+
+    headers = {"Content-Type": "application/json"}
+
+    try:
+        response = requests.post(
+            api_url,
+            data=json.dumps(payload),
+            headers=headers
+        )
+
+        result = response.json()
+
+        if response.status_code == 201:
+            print(f"insert auth_code success")
+            print(f"UUID: {result['data']['auth_uuid']}")
+        else:
+            print(f"error: {result.get('error', 'unknown error')}")
+
+        return result
+
+    except Exception as e:
+        print(f"error: {str(e)}")
+        return {"success": False, "error": str(e)}
+
 @hydra.main(config_path="config", config_name="config", version_base=None)
 def main(config: DictConfig):
     OmegaConf.set_struct(config, False)
@@ -150,25 +194,17 @@ def main(config: DictConfig):
     print(f"[Register] Register {len(tokens)} accounts successfully")
     
     if config.oneapi.enabled and len(account_infos) > 0:
-        from tokenManager.oneapi_manager import OneAPIManager
-        from tokenManager.cursor import Cursor
-
         oneapi_url = config.oneapi.url
         oneapi_token = config.oneapi.token
         oneapi_channel_url = config.oneapi.channel_url
-
-        oneapi = OneAPIManager(oneapi_url, oneapi_token)
-        # Send request by batch to avoid "Too many SQL variables" error in SQLite.
-        # If you use MySQL, better to set the batch_size as len(tokens)
-        batch_size = 10
-        for idx, i in enumerate(range(0, len(tokens), batch_size), start=1):
-            batch = tokens[i:i + batch_size]
-            response = oneapi.add_channel(name = "Cursor",
-                                          base_url = oneapi_channel_url,
-                                          key = '\n'.join(batch),
-                                          models = Cursor.models,
-                                          tags = "Cursor")
-            print(f'[OneAPI] Add Channel Request For Batch {idx}. Status Code: {response.status_code}, Response Body: {response.json()}')
+        # 直接循环account_infos中的每个账号信息
+        for account_info in account_infos:
+            id = uuid.uuid4()
+            username = account_info['username']
+            token = account_info['token']
+            # 从token中提取auth_code部分
+            auth_code = token.split("%3A%3A")[1]
+            insert_auth_code(oneapi_url, oneapi_token, auth_code, username, str(id))
 
 if __name__ == "__main__":
     main()
