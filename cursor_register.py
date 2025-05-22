@@ -54,7 +54,7 @@ def register_cursor_core(register_config, options):
         imap_username = register_config.imap_email_server.username
         imap_password = register_config.imap_email_server.password
         email_address = register_config.email_server.email_address
-        email_server = Pop(imap_server, imap_port, imap_username, imap_password, email_to = email_address)
+        email_server = Imap(imap_server, imap_port, imap_username, imap_password, email_to = email_address)
 
     register = CursorRegister(browser, email_server)
     tab_signin, status = register.sign_in(email_address)
