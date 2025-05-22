@@ -12,7 +12,7 @@ from ._email_server import EmailServer
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('PopEmail')
 
-class IMap(EmailServer):
+class Imap(EmailServer):
 
     def __init__(self, pop_server, pop_port, username, password, email_to = None):
         logger.info(f"Initializing POP3 connection: server={pop_server}, port={pop_port}, user={username}")
