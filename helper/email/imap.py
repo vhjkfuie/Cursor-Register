@@ -1,38 +1,32 @@
 import time
-import imaplib
+import poplib
 import email
 from email.policy import default
 from datetime import datetime
 
 from ._email_server import EmailServer
 
-class Imap(EmailServer):
+class Pop(EmailServer):
 
-    def __init__(self, imap_server, imap_port, username, password, email_to = None):
-        self.mail = imaplib.IMAP4_SSL(imap_server, imap_port)
-        self.mail.login(username, password)
+    def __init__(self, pop_server, pop_port, username, password, email_to = None):
+        self.mail = poplib.POP3_SSL(pop_server, pop_port)
+        self.mail.user(username)
+        self.mail.pass_(password)
 
         self.email_to = email_to
         
-        self.mail.select('inbox')
-        _, data = self.mail.uid("SEARCH", None, 'ALL')
-        email_ids = data[0].split()
-        self.latest_id = email_ids[-1] if len(email_ids) != 0 else None
+        # Get message count
+        msg_count = len(self.mail.list()[1])
+        self.latest_id = msg_count if msg_count > 0 else None
 
     def fetch_emails_since(self, since_timestamp):
-
-        # Get the latest email by id
-        self.mail.select('inbox')
-        search_criteria = f'UID {int(self.latest_id) + 1}:*' if self.latest_id else 'ALL'
-        _, data = self.mail.uid("SEARCH", None, search_criteria)
-        email_ids = data[0].split()
-        if len(email_ids) == 0:
+        if self.latest_id is None or self.latest_id == 0:
             return None
-        self.latest_id = email_ids[-1]
-        
-        # Fetch the email message by ID
-        _, data = self.mail.uid('FETCH', self.latest_id, '(RFC822)')
-        raw_email = data[0][1]
+
+        # POP3 doesn't have search capability like IMAP
+        # We'll check the latest email
+        _, lines, _ = self.mail.retr(self.latest_id)
+        raw_email = b'\r\n'.join(lines)
         msg = email.message_from_bytes(raw_email, policy=default)
 
         # Extract common headers
@@ -51,6 +45,9 @@ class Imap(EmailServer):
         text_part = msg.get_body(preferencelist=('plain',))
         content = text_part.get_content() if text_part else msg.get_content()
 
+        # Increment latest ID for next check
+        self.latest_id += 1
+
         return {
             "from": from_header,
             "to": to_header,
@@ -64,9 +61,13 @@ class Imap(EmailServer):
 
         while time.time() - start_time <= timeout:
             try:
-                email = self.fetch_emails_since(start_time)
-                if email is not None:
-                    return email
+                # Update message count before checking
+                msg_count = len(self.mail.list()[1])
+                if msg_count > self.latest_id:
+                    self.latest_id = msg_count
+                    email = self.fetch_emails_since(start_time)
+                    if email is not None:
+                        return email
             except:
                 pass
             time.sleep(delay)
