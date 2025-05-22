@@ -31,8 +31,9 @@ class Imap(EmailServer):
             resp, items, octets = self.mail.list()
             msg_count = len(items)
             logger.info(f"Total emails in mailbox: {msg_count}")
-            self.latest_id = msg_count if msg_count > 0 else None
-            logger.info(f"Set latest email ID: {self.latest_id}")
+            self.latest_id = msg_count if msg_count > 0 else 0
+            self.prev_count = self.latest_id
+            logger.info(f"Set latest email ID: {self.latest_id}, prev_count: {self.prev_count}")
         except Exception as e:
             logger.error(f"POP3 connection initialization failed: {str(e)}")
             raise
@@ -96,10 +97,6 @@ class Imap(EmailServer):
             else:
                 logger.warning("No verification code pattern found in email content")
 
-            # 更新最新ID以便下次检查
-            self.latest_id += 1
-            logger.info(f"Updated latest email ID: {self.latest_id}")
-
             return {
                 "from": from_header,
                 "to": to_header,
@@ -121,12 +118,16 @@ class Imap(EmailServer):
                 logger.info("Checking for new emails")
                 resp, items, octets = self.mail.list()
                 msg_count = len(items)
-                logger.info(f"Current email count: {msg_count}, latest email ID: {self.latest_id}")
+                logger.info(f"Current email count: {msg_count}, previous count: {self.prev_count}")
                 
-                if msg_count > self.latest_id:
-                    logger.info(f"New email(s) found: {msg_count} > {self.latest_id}")
+                if msg_count > self.prev_count:
+                    logger.info(f"New email(s) found: {msg_count} > {self.prev_count}")
+                    # Find new email ID - typically the last one
                     self.latest_id = msg_count
+                    logger.info(f"Setting latest email ID to: {self.latest_id}")
                     email = self.fetch_emails_since(start_time)
+                    # Update previous count after processing
+                    self.prev_count = msg_count
                     if email is not None:
                         logger.info("Successfully retrieved new email")
                         return email
@@ -134,6 +135,8 @@ class Imap(EmailServer):
                         logger.warning("Retrieved new email does not meet criteria")
                 else:
                     logger.info("No new emails")
+                    # Update previous count to handle fluctuations
+                    self.prev_count = msg_count
             except Exception as e:
                 logger.error(f"Error checking for new emails: {str(e)}")
                 pass
