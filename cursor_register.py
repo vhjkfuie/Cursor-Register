@@ -13,9 +13,10 @@ from datetime import datetime
 from omegaconf import OmegaConf, DictConfig
 from DrissionPage import ChromiumOptions, Chromium
 
-from temp_mails import Tempmail_io, Guerillamail_com
+import temp_mails
 from helper.cursor_register import CursorRegister
 from helper.email import *
+from helper.email.temp_mails_wrapper import TempMailsWrapper
 
 # Parameters for debugging purpose
 hide_account_info = os.getenv('HIDE_ACCOUNT_INFO', 'false').lower() == 'true'
@@ -32,7 +33,20 @@ def register_cursor_core(register_config, options):
         return None
     
     if register_config.email_server.name == "temp_email_server":
-        email_server = eval(register_config.temp_email_server.name)(browser)
+        # 使用TempMailsWrapper而不是直接eval
+        mail_class_name = register_config.temp_email_server.name
+        if hasattr(temp_mails, mail_class_name):
+            mail_class = getattr(temp_mails, mail_class_name)
+            email_provider = mail_class()
+            email_server = TempMailsWrapper(email_provider)
+        else:
+            # 如果指定的类不存在，使用随机可用的临时邮箱类
+            mail_class = TempMailsWrapper.get_random_mail_class()
+            if mail_class:
+                email_provider = mail_class()
+                email_server = TempMailsWrapper(email_provider)
+            else:
+                raise Exception("无法找到可用的临时邮箱服务")
         email_address = email_server.get_email_address()
     elif register_config.email_server.name == "imap_email_server":
         imap_server = register_config.imap_email_server.imap_server
@@ -40,7 +54,7 @@ def register_cursor_core(register_config, options):
         imap_username = register_config.imap_email_server.username
         imap_password = register_config.imap_email_server.password
         email_address = register_config.email_server.email_address
-        email_server = Imap(imap_server, imap_port, imap_username, imap_password, email_to = email_address)
+        email_server = Pop(imap_server, imap_port, imap_username, imap_password, email_to = email_address)
 
     register = CursorRegister(browser, email_server)
     tab_signin, status = register.sign_in(email_address)
