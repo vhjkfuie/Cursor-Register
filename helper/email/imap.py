@@ -6,7 +6,7 @@ from datetime import datetime
 
 from ._email_server import EmailServer
 
-class Pop(EmailServer):
+class Imap(EmailServer):
 
     def __init__(self, pop_server, pop_port, username, password, email_to = None):
         self.mail = poplib.POP3_SSL(pop_server, pop_port)
